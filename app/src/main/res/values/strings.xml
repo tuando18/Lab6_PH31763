@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Lab6_PH31763</string>
+    <string name="txt_themsv">THÊM SINH VIÊN</string>
+    <string name="txt_user">Nhập tên sinh viên</string>
+    <string name="txt_pass">Nhập địa chỉ</string>
+    <string name="txt_submit">SUBMIT</string>
+    <string name="txt_dssv">DANH SÁCH SINH VIÊN</string>
+    <string name="txt_them">Thêm mới</string>
+</resources>
