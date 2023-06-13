@@ -1,6 +1,9 @@
 package com.dovantuan.lab6_ph31763;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,9 +14,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,13 +32,12 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 public class Activity_DSSV extends AppCompatActivity {
 
     AdapterDSSV adapterSv;
     ListView lvdssv;
+    Context context=this;
     ArrayList<ListDssv> listSv = new ArrayList<>();
 //    AdapterDSSV adapterSv;
 
@@ -68,24 +72,36 @@ public class Activity_DSSV extends AppCompatActivity {
 
         lvdssv = findViewById(R.id.lv_sv);
 
-        // Khởi tạo dữ liệu danh sách
-        listSv.add(new ListDssv("FPoly Hà Nội", "Nguyễn Văn Tuấn", "Bắc Ninh"));
-        listSv.add(new ListDssv("FPoly Hồ Chí Minh", "Đỗ Văn Tuấn", "Tây Ninh"));
-        listSv.add(new ListDssv("FPoly Đà Nẵng", "Nguyễn Công Thưởng", "Nha Trang"));
-        listSv.add(new ListDssv("FPoly Tây Nguyên", "Nguyễn Vinh Tài", "Đắk Lắk"));
-        listSv.add(new ListDssv("FPoly Cần Thơ", "Cấn Gia Khiêm", "Kiên Giang"));
+        readWriteStudent readWriteStudent = new readWriteStudent(context);
+        listSv=readWriteStudent.getDataOld(context, "student.txt");
+
+
+//        // Khởi tạo dữ liệu danh sách
+//        listSv.add(new ListDssv("FPoly Hà Nội", "Nguyễn Văn Tuấn", "Bắc Ninh"));
+//        listSv.add(new ListDssv("FPoly Hồ Chí Minh", "Đỗ Văn Tuấn", "Tây Ninh"));
+//        listSv.add(new ListDssv("FPoly Đà Nẵng", "Nguyễn Công Thưởng", "Nha Trang"));
+//        listSv.add(new ListDssv("FPoly Tây Nguyên", "Nguyễn Vinh Tài", "Đắk Lắk"));
+//        listSv.add(new ListDssv("FPoly Cần Thơ", "Cấn Gia Khiêm", "Kiên Giang"));
         fill();
 
-//        Button btn_add = findViewById(R.id.btn_add);
-//        btn_add.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(Activity_DSSV.this, Activity_AddStudent.class);
-//                getData.launch(intent);
-//            }
-//        });
     }
+    public void fill() {
+        adapterSv = new AdapterDSSV(Activity_DSSV.this, listSv, new DeleteItem() {
+            @Override
+            public void onClickForDelete(int pos) {
+                readWriteStudent readWriteStudent2 =new readWriteStudent(context);
+                readWriteStudent2.deleteOneStudent(context,listSv,pos,"student.txt");
+            }
+        }, new UpdateItem() {
+            @Override
+            public void onClickForUpdate(int pos, String branch,String name, String address) {
+                readWriteStudent readWriteStudent1 =new readWriteStudent(context);
+                readWriteStudent1.updateStudent(context,listSv,pos,new ListDssv(branch,name,address),"student.txt");
 
+            }
+        });
+        lvdssv.setAdapter(adapterSv);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -124,17 +140,6 @@ public class Activity_DSSV extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-
-    public void fill() {
-        adapterSv = new AdapterDSSV(Activity_DSSV.this, listSv);
-        lvdssv.setAdapter(adapterSv);
-    }
-
-    public void deleteSV(int index) {
-        listSv.remove(index);
-        fill();
     }
 
     public static final String KEY_SV_MODEL = "sv_model";
@@ -178,11 +183,15 @@ public class Activity_DSSV extends AppCompatActivity {
 
         Activity activity;
         ArrayList<ListDssv> list, listOld;
+        DeleteItem deleteItem;
+        UpdateItem updateItem;
 
-        public AdapterDSSV(Activity activity, ArrayList<ListDssv> list) {
+        public AdapterDSSV(Activity activity, ArrayList<ListDssv> list,DeleteItem deleteItem, UpdateItem updateItem) {
             this.activity = activity;
             this.list = list;
             this.listOld = list;
+            this.updateItem= updateItem;
+            this.deleteItem = deleteItem;
         }
 
         @Override
@@ -220,8 +229,19 @@ public class Activity_DSSV extends AppCompatActivity {
             btnRemove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ((Activity_DSSV) activity).deleteSV(i);
-                    Toast.makeText(activity, "Đã xóa thành công!", Toast.LENGTH_SHORT).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                    builder.setTitle("Xóa sinh viên");
+                    builder.setMessage("Bạn có chắc chắn muốn xóa sinh viên này không?");
+                    builder.setPositiveButton("Xóa", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            deleteItem.onClickForDelete(i);
+                            notifyDataSetChanged();
+                        }
+                    });
+                    builder.setNegativeButton("Hủy", null);
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
                 }
             });
 
@@ -229,8 +249,28 @@ public class Activity_DSSV extends AppCompatActivity {
             btnUpdate.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((Activity_DSSV) activity).updateSV(i);
-                    Toast.makeText(activity, "Update thành công!", Toast.LENGTH_SHORT).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                    LayoutInflater inflater1 = ((Activity) activity).getLayoutInflater();
+                    View view1 = inflater1.inflate(R.layout.activity_addstudent, null);
+                    builder.setView(view1);
+
+                    final EditText txtTen = view1.findViewById(R.id.edt_username);
+                    final EditText txtDiaChi = view1.findViewById(R.id.edt_address);
+                    final Spinner cs = view1.findViewById(R.id.sp_ngonngu);
+                    builder.setTitle("Update Form");
+                    builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String ten = txtTen.getText().toString();
+                            String diaChi = txtDiaChi.getText().toString();
+                            updateItem.onClickForUpdate(i,"Hà Nội", ten, diaChi);
+                        }
+                    });
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+                    notifyDataSetChanged();
+//                    ((Activity_DSSV) activity).updateSV(i);
+//                    Toast.makeText(activity, "Update thành công!", Toast.LENGTH_SHORT).show();
                 }
             });
 

@@ -24,6 +24,7 @@ public class Activity_AddStudent extends AppCompatActivity {
     ArrayList<School> arrSchool = new ArrayList<>();
 
     SchoolSpinnerAdapter adapterSchool;
+    Context context=this;
 
 //    String selectedItemSpinner = "";
 
@@ -53,19 +54,6 @@ public class Activity_AddStudent extends AppCompatActivity {
 
         spSchool.setAdapter(adapterSchool);
 
-        // Xu li su kien khi nguoi dung chon spinner
-//        spSchool.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-//                selectedItemSpinner = ((School) spSchool.getItemAtPosition(i)).getName();
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> adapterView) {
-//                // Xử lý khi không có phần tử nào được chọn (nếu cần)
-//            }
-//        });
-
         if (svModel != null) { // sua sinh vien
             edtname.setText(svModel.name);
             edtaddress.setText(svModel.address);
@@ -90,6 +78,10 @@ public class Activity_AddStudent extends AppCompatActivity {
                 } else if (address.trim().equals("")) {
                     Toast.makeText(Activity_AddStudent.this, "Địa chỉ không được để trống!", Toast.LENGTH_SHORT).show();
                 } else {
+                    ArrayList<ListDssv> ls = new ArrayList<>();
+                    readWriteStudent readWriteStudent=new readWriteStudent(context);
+                    ls= readWriteStudent.getDataOld(context, "student.txt");
+                    readWriteStudent.writeStudent(context,"student.txt",new ListDssv(arrSchool.get(index).name, edtname.getText().toString(),edtaddress.getText().toString()),ls);
                     Intent intent = new Intent();
 
                     Bundle bundle = new Bundle();

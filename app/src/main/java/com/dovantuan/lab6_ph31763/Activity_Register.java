@@ -56,9 +56,11 @@ public class Activity_Register extends AppCompatActivity {
                     bundle.putString("username", sUserName);
                     bundle.putString("password", sPassword);
 
+                    User user = new User(sUserName, sPassword);
+                    writeUser.writeUser(Activity_Register.this, user);
+
                     intent.putExtras(bundle);
 
-//                    getData.launch(intent);
                     startActivity(intent);
 
                     Toast.makeText(Activity_Register.this, "Đăng kí thành công", Toast.LENGTH_SHORT).show();
